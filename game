@@ -129,6 +129,7 @@
         let botScore = 0;
         let currentTurn = 'player';
         let currentQuestion = null;
+        let posToIndex = {};
 
         // Soal aljabar (contoh sederhana)
         const questions = {
@@ -153,22 +154,39 @@
         const snakes = { 16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78 };
         const ladders = { 1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100 };
 
+        // Buat posisi papan dalam urutan visual (zigzag)
+        let positions = [];
+        for (let row = 0; row < 10; row++) {
+            if (row % 2 === 0) { // Baris genap: dari kanan ke kiri
+                for (let col = 9; col >= 0; col--) {
+                    let num = (9 - row) * 10 + (9 - col) + 1;
+                    positions.push(num);
+                }
+            } else { // Baris ganjil: dari kiri ke kanan
+                for (let col = 0; col < 10; col++) {
+                    let num = (9 - row) * 10 + col + 1;
+                    positions.push(num);
+                }
+            }
+        }
+
         // Buat papan
-        for (let i = 100; i >= 1; i--) {
+        positions.forEach((num, idx) => {
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            cell.textContent = i;
-            if (snakes[i]) cell.classList.add('snake');
-            if (ladders[i]) cell.classList.add('ladder');
+            cell.textContent = num;
+            if (snakes[num]) cell.classList.add('snake');
+            if (ladders[num]) cell.classList.add('ladder');
             board.appendChild(cell);
-        }
+            posToIndex[num] = idx;
+        });
 
         // Update posisi bidak
         function updateBoard() {
             document.querySelectorAll('.player').forEach(p => p.remove());
             document.querySelectorAll('.bot').forEach(b => b.remove());
-            const playerCell = board.children[100 - playerPos];
-            const botCell = board.children[100 - botPos];
+            const playerCell = board.children[posToIndex[playerPos]];
+            const botCell = board.children[posToIndex[botPos]];
             const playerDiv = document.createElement('div');
             playerDiv.classList.add('player');
             playerCell.appendChild(playerDiv);
